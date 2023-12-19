@@ -7,22 +7,19 @@ from pymongo import MongoClient
 def log_stats():
     """Prints stats about Nginx logs stored in a MongoDB"""
     client = MongoClient("mongodb://127.0.0.1:27017")
-    logs = client.logs.nginx
-    total = logs.count_documents({})
-    get = logs.count_documents({"method": "GET"})
-    post = logs.count_documents({"method": "POST"})
-    put = logs.count_documents({"method": "PUT"})
-    patch = logs.count_documents({"method": "PATCH"})
-    delete = logs.count_documents({"method": "DELETE"})
-    path = logs.count_documents({"method": "GET", "path": "/status"})
-    print(f"{total} logs")
+    nginx_collection = client.logs.nginx
+
+    print(f"{nginx_collection.count_documents({})} logs")
+
     print("Methods:")
-    print(f"\tmethod GET: {get}")
-    print(f"\tmethod POST: {post}")
-    print(f"\tmethod PUT: {put}")
-    print(f"\tmethod PATCH: {patch}")
-    print(f"\tmethod DELETE: {delete}")
-    print(f"{path} status check")
+    for method in ["GET", "POST", "PUT", "PATCH", "DELETE"]:
+        count = nginx_collection.count_documents({"method": method})
+        print(f"\tmethod {method}: {count}")
+
+    status = nginx_collection.count_documents(
+        {"method": "GET", "path": "/status"}
+    )
+    print(f"{status} status check")
 
 
 if __name__ == "__main__":
