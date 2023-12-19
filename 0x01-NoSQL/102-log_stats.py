@@ -36,3 +36,7 @@ def log_stats():
     for _ in range(10):
         for ip in sorted_ips:
             print(f"\t{ip.get('_id')}: {ip.get('count')}")
+
+
+if __name__ == "__main__":
+    log_stats()
