@@ -62,3 +62,19 @@ class Cache:
         key = str(uuid4())
         self._redis.mset({key: data})
         return key
+
+    def get(self, key: str, fn: Optional[Callable] = None) -> UnionOfTypes:
+        """
+        Retrieve data stored at a key and convert
+        the data back to the desired format.
+        """
+        data = self._redis.get(key)
+        return fn(data) if fn else data
+
+    def get_str(self, key: str) -> str:
+        """Retrieve a string from the cache."""
+        return self.get(key, str)
+
+    def get_int(self, key: str) -> int:
+        """Retrieve an integer from the cache."""
+        return self.get(key, int)
