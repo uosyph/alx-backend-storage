@@ -27,15 +27,16 @@ def log_stats():
 
     print("IPs:")
     sorted_ips = logs.aggregate(
-        [{"$group": 
-            {"_id": "$ip", "count": {"$sum": 1}}},
-            {"$sort": {"count": -1}
-        }]
+        [
+            {"$group": {"_id": "$ip", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}},
+            {"$limit": 10},
+            {"$project": {"_id": 0, "ip": "$_id", "count": 1}},
+        ]
     )
 
-    for _ in range(10):
-        for ip in sorted_ips:
-            print(f"\t{ip.get('_id')}: {ip.get('count')}")
+    for ip in sorted_ips:
+        print(f"\t{ip.get('ip')}: {ip.get('count')}")
 
 
 if __name__ == "__main__":
