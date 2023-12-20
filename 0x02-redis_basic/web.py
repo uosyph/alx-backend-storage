@@ -9,29 +9,29 @@ from functools import wraps
 redis_connection = redis.Redis()
 
 
-def wrap_requests(fn: Callable) -> Callable:
+def count_requests(method: Callable) -> Callable:
     """
     Decorator that wraps around HTTP request functions to provide caching.
     """
 
-    @wraps(fn)
+    @wraps(method)
     def wrapper(url):
-        """Wrapper function for the wrap_requests decorator."""
+        """Wrapper function for the count_requests decorator."""
         redis_connection.incr(f"count:{url}")
         cached_response = redis_connection.get(f"cached:{url}")
         if cached_response:
             return cached_response.decode("utf-8")
-        result = fn(url)
+        result = method(url)
         redis_connection.setex(f"cached:{url}", 10, result)
         return result
 
     return wrapper
 
 
-@wrap_requests
+@count_requests
 def get_page(url: str) -> str:
     """
     Retrieves a web page, and caches the response for 10 seconds.
     """
-    response = requests.get(url)
-    return response.text
+    res = requests.get(url)
+    return res.text

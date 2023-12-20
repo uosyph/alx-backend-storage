@@ -29,8 +29,8 @@ def call_history(method: Callable) -> Callable:
     Decorator that stores the history of inputs
     and outputs for a particular function.
     """
-    input_list = method.__qualname__ + ":inputs"
-    output_list = method.__qualname__ + ":outputs"
+    input_list =  f"{method.__qualname__}:inputs"
+    output_list = f"{method.__qualname__}:outputs"
 
     @wraps(method)
     def wrapper(self, *args) -> bytes:
