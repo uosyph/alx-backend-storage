@@ -29,7 +29,7 @@ def call_history(method: Callable) -> Callable:
     Decorator that stores the history of inputs
     and outputs for a particular function.
     """
-    input_list =  f"{method.__qualname__}:inputs"
+    input_list = f"{method.__qualname__}:inputs"
     output_list = f"{method.__qualname__}:outputs"
 
     @wraps(method)
@@ -41,6 +41,22 @@ def call_history(method: Callable) -> Callable:
         return output
 
     return wrapper
+
+
+def replay(method: Callable) -> None:
+    """
+    Replay function that prints the call history of a decorated method.
+    """
+    name = method.__qualname__
+    redis_connection = redis.Redis()
+
+    calls = redis_connection.get(name).decode("utf-8")
+    print(f"{name} was called {calls} times:")
+
+    inputs = redis_connection.lrange(f"{name}:inputs", 0, -1)
+    outputs = redis_connection.lrange(f"{name}:outputs", 0, -1)
+    for input, output in zip(inputs, outputs):
+        print(f"{name}(*{input.decode('utf-8')}) -> {output.decode('utf-8')}")
 
 
 class Cache:
