@@ -17,13 +17,14 @@ def count_requests(method: Callable) -> Callable:
     @wraps(method)
     def wrapper(url):
         """Wrapper function for the count_requests decorator."""
+        redis_connection = redis.Redis()
         redis_connection.incr(f"count:{url}")
-        cached_response = redis_connection.get(f"cached:{url}")
+        cached_response = redis_connection.get(url)
         if cached_response:
             return cached_response.decode("utf-8")
-        result = method(url)
-        redis_connection.setex(f"cached:{url}", 10, result)
-        return result
+        response = method(url)
+        redis_connection.set(url, response, 10)
+        return response
 
     return wrapper
 
@@ -33,5 +34,5 @@ def get_page(url: str) -> str:
     """
     Retrieves a web page, and caches the response for 10 seconds.
     """
-    res = requests.get(url)
-    return res.text
+    response = requests.get(url)
+    return response.text
