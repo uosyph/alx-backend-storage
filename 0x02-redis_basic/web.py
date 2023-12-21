@@ -22,9 +22,11 @@ def count_requests(method: Callable) -> Callable:
         cached_response = redis_connection.get(url)
         if cached_response:
             return cached_response.decode("utf-8")
-        response = method(url)
-        redis_connection.set(url, response, 10)
-        return response
+        cached_response = method(url)
+        redis_connection.set(url, 0)
+        redis_connection.setex(url, cached_response, 10)
+
+        return cached_response
 
     return wrapper
 
