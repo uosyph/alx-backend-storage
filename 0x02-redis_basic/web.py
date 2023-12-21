@@ -19,12 +19,12 @@ def count_requests(method: Callable) -> Callable:
         """Wrapper function for the count_requests decorator."""
         redis_connection = redis.Redis()
         redis_connection.incr(f"count:{url}")
-        cached_response = redis_connection.get(url)
+        cached_response = redis_connection.get(f"result:{url}")
         if cached_response:
             return cached_response.decode("utf-8")
         cached_response = method(url)
-        redis_connection.set(url, 0)
-        redis_connection.setex(url, cached_response, 10)
+        redis_connection.set(f"count:{url}", 0)
+        redis_connection.setex(f"result:{url}", cached_response, 10)
 
         return cached_response
 
